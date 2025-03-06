@@ -1511,6 +1511,7 @@ rewriteValuesRTEToNulls(Query *parsetree, RangeTblEntry *rte)
 	List	   *newValues;
 	ListCell   *lc;
 
+	Assert(rte->rtekind == RTE_VALUES);
 	newValues = NIL;
 	foreach(lc, rte->values_lists)
 	{
