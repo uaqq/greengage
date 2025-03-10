@@ -7412,7 +7412,6 @@ getPartitioningInfo(Archive *fout)
 	PQclear(res);
 
 	destroyPQExpBuffer(query);
-
 }
 
 /*

@@ -18,7 +18,6 @@
 #include "nodes/pathnodes.h"
 #include "nodes/plannodes.h"
 
-extern void SS_make_multiexprs_unique(PlannerInfo *root, PlannerInfo *subroot);
 #if 0
 /* Not used in GPDB */
 extern void SS_process_ctes(PlannerInfo *root);

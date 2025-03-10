@@ -1807,7 +1807,14 @@ exec_simple_query(const char *query_string)
 		if (Gp_role == GP_ROLE_UTILITY && IsA(parsetree->stmt, TransactionStmt) &&
 			((TransactionStmt *) parsetree->stmt)->kind == TRANS_STMT_PREPARE)
 		{
-			ereport(ERROR,
+			int		elevel = ERROR;
+
+#ifdef FAULT_INJECTOR
+			if (SIMPLE_FAULT_INJECTOR("enable_prepare_transaction") == FaultInjectorTypeSkip)
+				elevel = WARNING;
+#endif
+
+			ereport(elevel,
 					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 					 errmsg("PREPARE TRANSACTION is not supported in utility mode")));
 		}
@@ -2902,6 +2909,12 @@ exec_execute_message(const char *portal_name, int64 max_rows)
 			 */
 			CommandCounterIncrement();
 
+			/*
+			 * Set XACT_FLAGS_PIPELINING whenever we complete an Execute
+			 * message without immediately committing the transaction.
+			 */
+			MyXactFlags |= XACT_FLAGS_PIPELINING;
+
 			/* full command has been executed, reset timeout */
 			disable_statement_timeout();
 		}
@@ -2914,6 +2927,12 @@ exec_execute_message(const char *portal_name, int64 max_rows)
 		/* Portal run not complete, so send PortalSuspended */
 		if (whereToSendOutput == DestRemote)
 			pq_putemptymessage('s');
+
+		/*
+		 * Set XACT_FLAGS_PIPELINING whenever we suspend an Execute message,
+		 * too.
+		 */
+		MyXactFlags |= XACT_FLAGS_PIPELINING;
 	}
 
 	/*
@@ -4747,12 +4766,12 @@ PostgresMain(int argc, char *argv[],
 			 const char *dbname,
 			 const char *username)
 {
-	int			firstchar;
-	StringInfoData input_message;
 	sigjmp_buf	local_sigjmp_buf;
+
+	/* these must be volatile to ensure state is preserved across longjmp: */
 	volatile bool send_ready_for_query = true;
-	bool		idle_in_transaction_timeout_enabled = false;
-	bool		idle_gang_timeout_enabled = false;
+	volatile bool idle_in_transaction_timeout_enabled = false;
+	volatile bool idle_gang_timeout_enabled = false;
 
 	/*
 	 * CDB: Catch program error signals.
@@ -5078,10 +5097,12 @@ PostgresMain(int argc, char *argv[],
 		 * query cancels from being misreported as timeouts in case we're
 		 * forgetting a timeout cancel.
 		 */
-		disable_all_timeouts(false);
-		QueryCancelPending = false; /* second to avoid race condition */
+		disable_all_timeouts(false);	/* do first to avoid race condition */
+		QueryCancelPending = false;
 		QueryFinishPending = false;
 		stmt_timeout_active = false;
+		idle_in_transaction_timeout_enabled = false;
+		idle_gang_timeout_enabled = false;
 
 		/* Not reading from the client anymore. */
 		DoingCommandRead = false;
@@ -5177,6 +5198,9 @@ PostgresMain(int argc, char *argv[],
 
 	for (;;)
 	{
+		int			firstchar;
+		StringInfoData input_message;
+
 		/*
 		 * At top of loop, reset extended-query-message flag, so that any
 		 * errors encountered in "idle" state don't provoke skip.

@@ -54,6 +54,8 @@
 #ifdef isnan
 #undef isnan
 #endif
+/* Work around for using MSVC and Strawberry Perl >= 5.30. */
+#define __builtin_expect(expr, val) (expr)
 #endif
 
 /*
@@ -74,6 +76,16 @@
  */
 #ifdef _MSC_VER
 #define __inline__ inline
+#endif
+
+/*
+ * Newer versions of the perl headers trigger a lot of warnings with our
+ * compiler flags (at least -Wdeclaration-after-statement,
+ * -Wshadow=compatible-local are known to be problematic). The system_header
+ * pragma hides warnings from within the rest of this file, if supported.
+ */
+#ifdef HAVE_PRAGMA_GCC_SYSTEM_HEADER
+#pragma GCC system_header
 #endif
 
 /*
