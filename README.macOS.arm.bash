@@ -34,7 +34,7 @@ brew link --force apr
 brew link --force apr-util
 brew link --force libxml2
 
-# Needed for pygresql, or you can source greenplum_path.sh after compiling database and installing python-dependencies then
+# Needed for pygresql, or you can source greengage_path.sh after compiling database and installing python-dependencies then
 brew install postgresql
 
 # Installing python3 libraries
@@ -110,7 +110,7 @@ cat << EOF
 
 ===============================================================================
 INFO :
-Please source /usr/local/gpdb/greenplum_path.sh after compiling database, then
+Please source /usr/local/gpdb/greengage_path.sh after compiling database, then
 pip3 install --user -r python-dependencies.txt
 ===============================================================================
 EOF

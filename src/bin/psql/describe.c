@@ -143,7 +143,7 @@ static bool
 isGPDB6000OrLater(void)
 {
 	if (!gpCheckIsGP())
-		return false;		/* Not Greenplum at all. */
+		return false;		/* Not Greengage at all. */
 
 	/* GPDB 6 is based on PostgreSQL 9.4 */
 	return pset.sversion >= 90400;
@@ -153,7 +153,7 @@ static bool
 isGPDB6000OrBelow(void)
 {
 	if (!gpCheckIsGP())
-		return false;		/* Not Greenplum at all. */
+		return false;		/* Not Greengage at all. */
 
 	/* GPDB 6 is based on PostgreSQL 9.4 */
 	return pset.sversion <= 90400;
@@ -163,7 +163,7 @@ static bool
 isGPDB7000OrLater(void)
 {
 	if (!gpCheckIsGP())
-		return false;		/* Not Greenplum at all. */
+		return false;		/* Not Greengage at all. */
 
 	/* GPDB 7 is based on PostgreSQL v12 */
 	return pset.sversion >= 120000;
@@ -1596,7 +1596,7 @@ describeTableDetails(const char *pattern, bool verbose, bool showSystem)
 }
 
 static inline bool
-greenplum_is_ao_row(const char olddesc, const char *newdesc)
+greengage_is_ao_row(const char olddesc, const char *newdesc)
 {
 	if (olddesc == 'a')
 		return true;
@@ -1608,7 +1608,7 @@ greenplum_is_ao_row(const char olddesc, const char *newdesc)
 }
 
 static inline bool
-greenplum_is_ao_column(const char olddesc, const char *newdesc)
+greengage_is_ao_column(const char olddesc, const char *newdesc)
 {
 	if (olddesc == 'c')
 		return true;
@@ -2029,8 +2029,8 @@ describeOneTableDetails(const char *schemaname,
 
 	/* if AO reloptions are specified for table, replace the default reloptions */
 	if (tableinfo.relkind != RELKIND_PARTITIONED_TABLE &&
-		(greenplum_is_ao_column(tableinfo.relstorage, tableinfo.relam)
-			|| greenplum_is_ao_row(tableinfo.relstorage, tableinfo.relam)))
+		(greengage_is_ao_column(tableinfo.relstorage, tableinfo.relam)
+			|| greengage_is_ao_row(tableinfo.relstorage, tableinfo.relam)))
 	{
 
 		char *reloptions = pg_strdup(tableinfo.reloptions);
@@ -2142,7 +2142,7 @@ describeOneTableDetails(const char *schemaname,
 		}
 
 
-		if (greenplum_is_ao_column(tableinfo.relstorage, tableinfo.relam))
+		if (greengage_is_ao_column(tableinfo.relstorage, tableinfo.relam))
 		{
 			if (isGE42 == true)
 			{
@@ -2285,7 +2285,7 @@ describeOneTableDetails(const char *schemaname,
 	if (attstattarget_col >= 0)
 		headers[cols++] = gettext_noop("Stats target");
 
-	if (verbose && greenplum_is_ao_column(tableinfo.relstorage, tableinfo.relam))
+	if (verbose && greengage_is_ao_column(tableinfo.relstorage, tableinfo.relam))
 	{
 		headers[cols++] = gettext_noop("Compression Type");
 		headers[cols++] = gettext_noop("Compression Level");
@@ -2375,7 +2375,7 @@ describeOneTableDetails(const char *schemaname,
 			printTableAddCell(&cont, PQgetvalue(res, i, attstattarget_col),
 							  false, false);
 
-		if (greenplum_is_ao_column(tableinfo.relstorage, tableinfo.relam)
+		if (greengage_is_ao_column(tableinfo.relstorage, tableinfo.relam)
 				&& attoptions_col >= 0)
 		{
 			/* The compression type, compression level, and block size are all in the next column.
@@ -4244,7 +4244,7 @@ describeRoles(const char *pattern, bool verbose, bool showSystem)
 	int			conns;
 	const char	align = 'l';
 	char	  **attr;
-	const int   numgreenplumspecificattrs = 3;
+	const int   numgreengagespecificattrs = 3;
 
 	myopt.default_footer = false;
 
@@ -4261,7 +4261,7 @@ describeRoles(const char *pattern, bool verbose, bool showSystem)
 						  "        JOIN pg_catalog.pg_roles b ON (m.roleid = b.oid)\n"
 						  "        WHERE m.member = r.oid) as memberof");
 
-		/* add Greenplum specific attributes */
+		/* add Greengage specific attributes */
 		appendPQExpBufferStr(&buf, "\n, r.rolcreaterextgpfd");
 		appendPQExpBufferStr(&buf, "\n, r.rolcreatewextgpfd");
 		appendPQExpBufferStr(&buf, "\n, r.rolcreaterexthttp");
@@ -4341,7 +4341,7 @@ describeRoles(const char *pattern, bool verbose, bool showSystem)
 			add_role_attribute(&buf, _("Create DB"));
 
 
-		/* output Greenplum specific attributes */
+		/* output Greengage specific attributes */
 		if (strcmp(PQgetvalue(res, i, 9), "t") == 0)
 			add_role_attribute(&buf, _("Ext gpfdist Table"));
 
@@ -4350,15 +4350,15 @@ describeRoles(const char *pattern, bool verbose, bool showSystem)
 
 		if (strcmp(PQgetvalue(res, i, 11), "t") == 0)
 			add_role_attribute(&buf, _("Ext http Table"));
-		/* end Greenplum specific attributes */
+		/* end Greengage specific attributes */
 
 
 		if (strcmp(PQgetvalue(res, i, 5), "t") != 0)
 			add_role_attribute(&buf, _("Cannot login"));
 
 		if (pset.sversion >= 90100)
-			/* +numgreenplumspecificattrs is due to additional Greenplum specific attributes */
-			if (strcmp(PQgetvalue(res, i, (verbose ? 10 + numgreenplumspecificattrs : 9 + numgreenplumspecificattrs)), "t") == 0)
+			/* +numgreengagespecificattrs is due to additional Greengage specific attributes */
+			if (strcmp(PQgetvalue(res, i, (verbose ? 10 + numgreengagespecificattrs : 9 + numgreengagespecificattrs)), "t") == 0)
 				add_role_attribute(&buf, _("Replication"));
 
 		if (pset.sversion >= 90500)
@@ -4395,7 +4395,7 @@ describeRoles(const char *pattern, bool verbose, bool showSystem)
 		printTableAddCell(&cont, PQgetvalue(res, i, 8), false, false);
 
 		if (verbose && pset.sversion >= 80200)
-			printTableAddCell(&cont, PQgetvalue(res, i, 9 + numgreenplumspecificattrs), false, false);
+			printTableAddCell(&cont, PQgetvalue(res, i, 9 + numgreengagespecificattrs), false, false);
 	}
 	termPQExpBuffer(&buf);
 

@@ -5,20 +5,12 @@
 Change directory to gpdb sources destination. Make sure that directry doesn't contain binary objects from previous builds. Then run:
 for Ubuntu:
 ```bash
-docker build -t gpdb7_u22:latest -f arenadata/Dockerfile.ubuntu .
+docker build -t gpdb7_u22:latest -f ci/Dockerfile.ubuntu .
 ```
 for Rocky Linux:
 ```bash
-docker build -t gpdb7_regress:latest -f arenadata/Dockerfile .
+docker build -t gpdb7_regress:latest -f ci/Dockerfile .
 ```
-
-CI pushes docker images to the internal registry for each branch. We can pull it with usage of:
-
-* branch name as tag (latest for `adb-7.x` branch)
-* commit hash:
-  ```bash
-  docker pull hub.adsw.io/library/gpdb7_regress:1353d81
-  ```
 
 ## Full regression tests suite run
 
@@ -83,7 +75,7 @@ To use gdb inside the container, add the `--privileged` flag to the run command.
 ## ORCA linter
 
 ```bash
-docker build -t orca-linter:test -f arenadata/Dockerfile.linter .
+docker build -t orca-linter:test -f ci/Dockerfile.linter .
 docker run --rm -it orca-linter:test
 ```
 
@@ -105,7 +97,7 @@ docker run --rm -it gpdb7_regress:latest bash -c "gpdb_src/concourse/scripts/uni
 
 To just compile the code and check it for warnings with Clang on Ubuntu:
 ```bash
-docker build -t gpdb7_u22_clang_check:latest -f arenadata/Dockerfile.ubuntu.clang-check .
+docker build -t gpdb7_u22_clang_check:latest -f ci/Dockerfile.ubuntu.clang-check .
 ```
 
 Options for C and C++ compilers can be overridden via
@@ -129,12 +121,12 @@ check itself is performed in the build stage.
 1. Run the next commands in container
    ```bash
    source gpdb_src/concourse/scripts/common.bash
-   # this command unpack binaries to `/usr/local/greenplum-db-devel/`
+   # this command unpack binaries to `/usr/local/greengage-db-devel/`
    install_and_configure_gpdb
    gpdb_src/concourse/scripts/setup_gpadmin_user.bash
    make_cluster
    su - gpadmin -c '
-   source /usr/local/greenplum-db-devel/greenplum_path.sh;
+   source /usr/local/greengage-db-devel/greengage_path.sh;
    source gpdb_src/gpAux/gpdemo/gpdemo-env.sh;
    psql postgres'
    ```
@@ -147,11 +139,11 @@ Feature files are located in `gpMgmt/test/behave/mgmt_utils`
 Before run tests you need to build a docker-image
 for Ubuntu:
 ```bash
-docker build -t "hub.adsw.io/library/gpdb7_u22:${BRANCH_NAME}" -f arenadata/Dockerfile.ubuntu .
+docker build -t "greengage7_u22:${BRANCH_NAME}" -f ci/Dockerfile.ubuntu .
 ```
 for Rocky Linux:
 ```bash
-docker build -t "hub.adsw.io/library/gpdb7_regress:${BRANCH_NAME}" -f arenadata/Dockerfile .
+docker build -t "greengage7_regress:${BRANCH_NAME}" -f ci/Dockerfile .
 ```
 
 Command to run features:
@@ -159,27 +151,27 @@ Command to run features:
 for Ubuntu:
 ```bash
 # Run all tests
-IMAGE=hub.adsw.io/library/gpdb7_regress:${BRANCH_NAME} bash arenadata/scripts/run_behave_tests.bash
+IMAGE=greengage7_u22:${BRANCH_NAME} bash ci/scripts/run_behave_tests.bash
 
 # Run specific features
-IMAGE=hub.adsw.io/library/gpdb7_regress:${BRANCH_NAME} bash arenadata/scripts/run_behave_tests.bash gpstart gpstop
+IMAGE=greengage7_u22:${BRANCH_NAME} bash ci/scripts/run_behave_tests.bash gpstart gpstop
 ```
 
 for Rocky Linux:
 ```bash
 # Run all tests
-bash arenadata/scripts/run_behave_tests.bash
+IMAGE=greengage7_regress:${BRANCH_NAME} bash ci/scripts/run_behave_tests.bash
 
 # Run specific features
-bash arenadata/scripts/run_behave_tests.bash gpstart gpstop
+IMAGE=greengage7_regress:${BRANCH_NAME} bash ci/scripts/run_behave_tests.bash gpstart gpstop
 ```
 
 
 Tests use `allure-behave` package and store allure output files in `allure-results` folder.
-Also, the allure report for each failed test has gpdb logs attached files. See `gpMgmt/test/behave_utils/arenadata/formatter.py`
+Also, the allure report for each failed test has gpdb logs attached files. See `gpMgmt/test/behave_utils/ci/formatter.py`
 It required to add `gpMgmt/tests` directory to `PYTHONPATH`. 
 
-Greenplum cluster in Docker containers has its own peculiarities in preparing a cluster for tests.
+Greengage cluster in Docker containers has its own peculiarities in preparing a cluster for tests.
 All tests are run in one way or another on the demo cluster, wherever possible.
 For example, cross_subnet tests or tests with tag `concourse_cluster` currently not worked because of too complex cluster preconditions.
 

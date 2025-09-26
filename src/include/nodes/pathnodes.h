@@ -5,7 +5,8 @@
  *
  *
  * Portions Copyright (c) 2005-2010, Greenplum inc
- * Portions Copyright (c) 2012-Present VMware, Inc. or its affiliates.
+ * Portions Copyright (c) 2012-2024 VMware, Inc. or its affiliates.
+ * Portions Copyright (c) 2025-Present, Greengage Community
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *
@@ -881,7 +882,7 @@ typedef struct RelOptInfo
 	Oid			serverid;		/* identifies server for the table or join */
 	Oid			userid;			/* identifies user to check access as */
 	bool		useridiscurrent;	/* join is only valid for current user */
-	char		exec_location;  /* execute on COORDINATOR, ANY or ALL SEGMENTS, Greenplum MPP specific */
+	char		exec_location;  /* execute on COORDINATOR, ANY or ALL SEGMENTS, Greengage MPP specific */
 	/* use "struct FdwRoutine" to avoid including fdwapi.h here */
 	struct FdwRoutine *fdwroutine;
 	void	   *fdw_private;
@@ -1966,7 +1967,7 @@ typedef struct ProjectionPath
 	bool		dummypp;		/* true if no separate Result is needed */
 
 	/*
-	 * Greenplum specific field:
+	 * Greengage specific field:
 	 * If force is true, we always create a Result plannode.
 	 */
 	bool        force;
@@ -2854,7 +2855,7 @@ typedef struct JoinPathExtraData
 /*
  * PostgreSQL's executor doesn't support hashed aggregation
  * with DISTINCT, because it's supposed to be "a certain loser",
- * which is not that certion in Greenplum MPP architecture.
+ * which is not that certion in Greengage MPP architecture.
  */
 #define GROUPING_CAN_USE_MPP_HASH   0x0008
 

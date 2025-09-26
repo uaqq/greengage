@@ -4,7 +4,8 @@
  *	  Commands for creating and altering table structures and settings
  *
  * Portions Copyright (c) 2005-2010, Greenplum inc
- * Portions Copyright (c) 2012-Present VMware, Inc. or its affiliates.
+ * Portions Copyright (c) 2012-2024 VMware, Inc. or its affiliates.
+ * Portions Copyright (c) 2025-Present, Greengage Community
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *
@@ -772,7 +773,7 @@ DefineRelation(CreateStmt *stmt, char relkind, Oid ownerId,
 		ownerId = GetUserId();
 
 	/*
-	 * Greenplum: the accessMethod is necessary to extract, transform and
+	 * Greengage: the accessMethod is necessary to extract, transform and
 	 * validate the reloptions.
 	 */
 
@@ -845,7 +846,7 @@ DefineRelation(CreateStmt *stmt, char relkind, Oid ownerId,
 									 true, false);
 
 	/*
-	 * Greenplum: special case checks for reloptions that correspond to
+	 * Greengage: special case checks for reloptions that correspond to
 	 * appendonly relations. This check can not be performed earlier because it
 	 * is needed to know the access method.
 	 */
@@ -928,7 +929,7 @@ DefineRelation(CreateStmt *stmt, char relkind, Oid ownerId,
 	else
 		policy = getPolicyForDistributedBy(stmt->distributedBy, descriptor);
 
-	/* Greenplum specific code */
+	/* Greengage specific code */
 	if (list_length(schema) == 0)
 	{
 		elogif(Gp_role == GP_ROLE_DISPATCH, WARNING,
@@ -5317,7 +5318,7 @@ ATPrepCmd(List **wqueue, Relation rel, AlterTableCmd *cmd,
 								ATT_PARTITIONED_INDEX);
 			/*
 			 * GPDB: This command never recurses in upstream Postgres, however,
-			 * it recurses in Greenplum.
+			 * it recurses in Greengage.
 			 */
 			ATSimpleRecursion(wqueue, rel, cmd, recurse, lockmode);
 			ATPrepSetTableSpace(tab, rel, cmd->name, lockmode);
@@ -12456,11 +12457,11 @@ validateForeignKeyConstraint(char *conname,
 	ereport(DEBUG1,
 			(errmsg("validating foreign key constraint \"%s\"", conname)));
 
-	/* Greenplum Database: Ignore foreign keys for now, with a warning. */
+	/* Greengage Database: Ignore foreign keys for now, with a warning. */
 	if (Gp_role == GP_ROLE_DISPATCH || Gp_role == GP_ROLE_UTILITY)
 		ereport(WARNING,
 				(errcode(ERRCODE_GP_FEATURE_NOT_YET),
-				 errmsg("referential integrity (FOREIGN KEY) constraints are not supported in Greenplum Database, will not be enforced")));
+				 errmsg("referential integrity (FOREIGN KEY) constraints are not supported in Greengage Database, will not be enforced")));
 	return;
 
 	/*
@@ -12600,13 +12601,13 @@ createForeignKeyActionTriggers(Relation rel, Oid refRelOid, Constraint *fkconstr
 	CreateTrigStmt *fk_trigger;
 
 	/*
-	 * Special for Greenplum Database: Ignore foreign keys for now, with warning
+	 * Special for Greengage Database: Ignore foreign keys for now, with warning
 	 */
 	if (Gp_role == GP_ROLE_DISPATCH || Gp_role == GP_ROLE_UTILITY)
 	{
 		ereport(WARNING,
 				(errcode(ERRCODE_INVALID_TABLE_DEFINITION),
-				 errmsg("referential integrity (FOREIGN KEY) constraints are not supported in Greenplum Database, will not be enforced")));
+				 errmsg("referential integrity (FOREIGN KEY) constraints are not supported in Greengage Database, will not be enforced")));
 	}
 
 	/*
@@ -14173,7 +14174,7 @@ ATPostAlterTypeCleanup(List **wqueue, AlteredTableInfo *tab, LOCKMODE lockmode)
 			 * The drop currently only performs on coordinator which lead error when
 			 * recreating index (since recreate index will dispatch to segments and
 			 * there still old constraint index exists)
-			 * Related issue: https://github.com/greenplum-db/gpdb/issues/10561.
+			 * Related issue: https://github.com/GreengageDB/greengage/issues/10561.
 			 */
 			ereport(ERROR,
 					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
@@ -15361,7 +15362,7 @@ ATExecSetRelOptions(Relation rel, List *defList, AlterTableType operation,
 			DefElem    *def = lfirst(cell);
 
 			/*
-			 * Autovacuum on user tables is not enabled in Greenplum.  Move on
+			 * Autovacuum on user tables is not enabled in Greengage.  Move on
 			 * with a warning.  The decision to not error out is in favor of
 			 * DDL compatibility with external BI tools.
 			 */
@@ -15370,7 +15371,7 @@ ATExecSetRelOptions(Relation rel, List *defList, AlterTableType operation,
 							   strlen("autovaccum")) == 0)
 				ereport(WARNING,
 						(errcode(ERRCODE_GP_FEATURE_NOT_YET),
-						 errmsg("autovacuum is not supported in Greenplum")));
+						 errmsg("autovacuum is not supported in Greengage")));
 		}
 	}
 

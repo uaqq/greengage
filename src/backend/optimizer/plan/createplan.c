@@ -6,7 +6,8 @@
  *	  Path into a Plan.
  *
  * Portions Copyright (c) 2005-2008, Greenplum inc
- * Portions Copyright (c) 2012-Present VMware, Inc. or its affiliates.
+ * Portions Copyright (c) 2012-2024 VMware, Inc. or its affiliates.
+ * Portions Copyright (c) 2025-Present, Greengage Community
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *
@@ -1001,7 +1002,7 @@ use_physical_tlist(PlannerInfo *root, Path *path, int flags)
 	}
 
 	/* 
-	 * Greenplum specific code: when generating scan plan in create_scan_plan(),
+	 * Greengage specific code: when generating scan plan in create_scan_plan(),
 	 * the upstream code prefer to generate a tlist containing all Vars in
 	 * order. For the AO-type storage, it would result into unnecessary
 	 * overhead and impact performance, so in this case we let the tlist apply
@@ -2106,12 +2107,12 @@ create_projection_plan(PlannerInfo *root, ProjectionPath *best_path, int flags)
 	}
 
 	/*
-	 * Greenplum specific behavior:
+	 * Greengage specific behavior:
 	 * We may use the Result plan with resconstantqual to be
 	 * One-Time Filter: (gp_execution_segment() = <some segid>).
 	 * We should re-consider direct dispatch info in this case.
 	 * See function `set_append_path_locus` and Github Issue
-	 * https://github.com/greenplum-db/gpdb/issues/9874 for more
+	 * https://github.com/GreengageDB/greengage/issues/9874 for more
 	 * detailed info.
 	 */
 	if (root->config->gp_enable_direct_dispatch && best_path->direct_dispath_contentIds)

@@ -2454,7 +2454,7 @@ aoco_relation_needs_toast_table(Relation rel)
 {
 	/*
 	 * AO_COLUMN never used the toasting, don't create the toast table from
-	 * Greenplum 7
+	 * Greengage 7
 	 */
 	return false;
 }

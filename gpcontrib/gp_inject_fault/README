@@ -10,7 +10,7 @@ only if certain conditions are met. See section **Fault Injection Macros** below
 
 A fault point is identified by a name.
 This module provides an interface to inject a predefined fault point
-into a running Greenplum cluster by associating an action with the
+into a running Greengage cluster by associating an action with the
 fault point.  Action can be error, panic, sleep, skip, infinite_loop,
 etc.
 

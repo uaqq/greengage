@@ -2255,11 +2255,11 @@ postgresIsForeignRelUpdatable(Relation rel)
 		return 0;
 
 	/*
-	 * Greenplum only supports INSERT, because UPDATE/DELETE SELECT requires
+	 * Greengage only supports INSERT, because UPDATE/DELETE SELECT requires
 	 * the hidden column gp_segment_id and the other "ModifyTable mixes
 	 * distributed and entry-only tables" issue.
 	 */
-	bool isGreenplum = false;
+	bool isGreengage = false;
 	UserMapping *user = GetUserMapping(rel->rd_rel->relowner, table->serverid);
 	if (is_multi_servers(server, table->exec_location))
 	{
@@ -2272,12 +2272,12 @@ postgresIsForeignRelUpdatable(Relation rel)
 				break;
 		}
 		if (index != server->num_segments)
-			isGreenplum = true;
+			isGreengage = true;
 	}
 	else
-		isGreenplum = gpCheckIsGP(server, user);
+		isGreengage = gpCheckIsGP(server, user);
 
-	if (isGreenplum)
+	if (isGreengage)
 		return (1 << CMD_INSERT);
 	else
 		return (1 << CMD_INSERT) | (1 << CMD_UPDATE) | (1 << CMD_DELETE);

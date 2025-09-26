@@ -10,6 +10,7 @@
  * It doesn't matter whether the bits are on spinning rust or some other
  * storage technology.
  *
+ * Portions Copyright (c) 2025-Present, Greengage Community
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *
@@ -373,7 +374,7 @@ mdunlinkfork(RelFileNodeBackend rnode, ForkNumber forkNum, bool isRedo)
 	if (isRedo || forkNum != MAIN_FORKNUM || RelFileNodeBackendIsTemp(rnode))
 	{
 /*
- * GPDB: Temp tables use shared buffers in Greenplum. As a result, simple unlink
+ * GPDB: Temp tables use shared buffers in Greengage. As a result, simple unlink
  * is not enough to return disk space to the OS immediately, because the files
  * of a temp relation can still be opened by the bg writer process. To fix this
  * problem, in GPDB we skip the check if the relation is temp or not, so files
@@ -429,7 +430,7 @@ mdunlinkfork(RelFileNodeBackend rnode, ForkNumber forkNum, bool isRedo)
 		{
 			sprintf(segpath, "%s.%u", path, segno);
 /*
- * GPDB: Temp tables use shared buffers in Greenplum. As a result, simple unlink
+ * GPDB: Temp tables use shared buffers in Greengage. As a result, simple unlink
  * is not enough to return disk space to the OS immediately, because the files
  * of a temp relation can still be opened by the bg writer process. To fix this
  * problem, in GPDB we skip the check if the relation is temp or not, so files
