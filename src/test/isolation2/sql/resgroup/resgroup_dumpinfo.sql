@@ -2,7 +2,6 @@ DROP ROLE IF EXISTS role_dumpinfo_test;
 DROP ROLE IF EXISTS role_permission;
 -- start_ignore
 DROP RESOURCE GROUP rg_dumpinfo_test;
-CREATE LANGUAGE plpython3u;
 -- end_ignore
 
 CREATE FUNCTION dump_test_check() RETURNS bool
@@ -99,4 +98,3 @@ SELECT count(*) FROM pg_resgroup_get_status_kv(NULL);
 DROP ROLE role_dumpinfo_test;
 DROP ROLE role_permission;
 DROP RESOURCE GROUP rg_dumpinfo_test;
-DROP LANGUAGE plpython3u CASCADE;
