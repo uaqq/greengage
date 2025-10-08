@@ -27,7 +27,7 @@ To help you with the process of coding and describing your pull requests for rev
 Here we mention just a few best practices we expect you to apply while contributing to Greengage DB. For detailed recommendations, please refer to Greengage DB’s [Pull Request Submission Guidelines](https://greengagedb.org/en/blog/contributing.html).
 
  - Follow [PostgreSQL Coding Conventions](https://www.postgresql.org/docs/devel/source.html) when writing C/C++ code for Greengage.
- - Run **pgindent** for C and Perl code as per [README.gpdb](https://github.com/GreengageDB/greengage/blob/main/src/tools/pgindent/README.gpdb).
+ - Run **pgindent** for C and Perl code as per [README.gpdb](https://github.com/GreengageDB/greengage/blob/7.x/src/tools/pgindent/README.gpdb).
  - Use [Pylint](https://www.pylint.org/) for all Python code.
  - Format all Golang code in accordance with [gofmt](https://golang.org/cmd/gofmt/).
 
