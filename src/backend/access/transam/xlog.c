@@ -7435,9 +7435,27 @@ StartupXLOG(void)
 		 */
 		if (ArchiveRecoveryRequested && IsUnderPostmaster)
 		{
+			bool		promotion_requested = false;
+
 			PublishStartupProcessInformation();
 			EnableSyncRequestForwarding();
-			SendPostmasterSignal(PMSIGNAL_RECOVERY_STARTED);
+
+			/*
+			 * GPDB: if promote trigger file exist we don't wish to send
+			 * PMSIGNAL_RECOVERY_STARTED, instead wish pg_ctl -w to wait till
+			 * connections can be actually accepted by the database.
+			 */
+			if (PromoteTriggerFile != NULL && strcmp(PromoteTriggerFile, "") != 0)
+			{
+				struct stat stat_buf;
+
+				if (stat(PromoteTriggerFile, &stat_buf) == 0)
+					promotion_requested = true;
+			}
+
+			if (!promotion_requested)
+				SendPostmasterSignal(PMSIGNAL_RECOVERY_STARTED);
+
 			bgwriterLaunched = true;
 		}
 
