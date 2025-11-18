@@ -23,6 +23,7 @@ Feature: gpactivatestandby
         Then gpinitstandby should return a return code of 0
         And verify the standby coordinator entries in catalog
         When there is a "heap" table "foobar" in "postgres" with data
+        And the user runs "gpconfig -c recovery_end_command -v "'sleep 2'" --skipvalidation"
         And the coordinator goes down
         And the standby coordinator goes down
         And the user runs gpactivatestandby with options " "
@@ -33,6 +34,8 @@ Feature: gpactivatestandby
         And verify that table "foobar" in "postgres" has "2190" rows
         And verify that gpstart on original coordinator fails due to lower Timeline ID
         And clean up and revert back to original coordinator
+        And the user runs "gpconfig -r recovery_end_command --skipvalidation"
+        And the user runs "gpstop -u"
 
     Scenario: gpactivatestandby should fail when given invalid data directory
         Given the database is running
