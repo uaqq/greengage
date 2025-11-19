@@ -11,6 +11,8 @@
 
 #include "postgres_fe.h"
 
+#include "libpq-fe.h"
+
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
@@ -659,8 +661,10 @@ is_secondary_instance(const char *pg_data)
 static WaitPMResult
 wait_for_postmaster_start(pgpid_t pm_pid, bool do_checkpoint)
 {
+	char		connstr[MAXPGPATH * 2 + 256];
 	int			i;
 	PMStartMode pmStartMode;
+	static const char *backend_options = "'-c gp_session_role=utility'";
 
 	if (strstr(post_opts, "gp_role=dispatch") != NULL)
 	{
@@ -686,6 +690,8 @@ wait_for_postmaster_start(pgpid_t pm_pid, bool do_checkpoint)
 			post_opts);
 		exit(1);
 	}
+
+	connstr[0] = '\0';
 
 	for (i = 0; i < wait_seconds * WAITS_PER_SEC; i++)
 	{
@@ -726,6 +732,73 @@ wait_for_postmaster_start(pgpid_t pm_pid, bool do_checkpoint)
 				 * status line (this assumes a v10 or later server).
 				 */
 				char	   *pmstatus = optlines[LOCK_FILE_LINE_PM_STATUS - 1];
+				PGPing		ping = PQPING_NO_RESPONSE;
+
+				if (connstr[0] == '\0')
+				{
+					int			portnum;
+					char	   *sockdir;
+					char	   *hostaddr;
+					char		host_str[MAXPGPATH];
+
+					/*
+					 * Extract port number and host string to use. Prefer
+					 * using Unix socket if available.
+					 */
+					portnum = atoi(optlines[LOCK_FILE_LINE_PORT - 1]);
+					sockdir = optlines[LOCK_FILE_LINE_SOCKET_DIR - 1];
+					hostaddr = optlines[LOCK_FILE_LINE_LISTEN_ADDR - 1];
+
+					/*
+					 * While unix_socket_directories can accept relative
+					 * directories, libpq's host parameter must have a
+					 * leading slash to indicate a socket directory.  So,
+					 * ignore sockdir if it's relative, and try to use TCP
+					 * instead.
+					 */
+					if (sockdir[0] == '/')
+						strlcpy(host_str, sockdir, sizeof(host_str));
+					else
+						strlcpy(host_str, hostaddr, sizeof(host_str));
+
+					/* remove trailing newline */
+					if (strchr(host_str, '\n') != NULL)
+						*strchr(host_str, '\n') = '\0';
+
+					/* Fail if couldn't get either sockdir or host addr */
+					if (host_str[0] == '\0')
+					{
+						write_stderr(_("\n%s: -w option cannot use a relative socket directory specification\n"),
+									 progname);
+						exit(1);
+					}
+
+					/*
+					 * Map listen-only addresses to counterparts usable
+					 * for establishing a connection.  connect() to "::"
+					 * or "0.0.0.0" is not portable to OpenBSD 5.0 or to
+					 * Windows Server 2008, and connect() to "::" is
+					 * additionally not portable to NetBSD 6.0.  (Cygwin
+					 * does handle both addresses, though.)
+					 */
+					if (strcmp(host_str, "*") == 0)
+						strcpy(host_str, "localhost");
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(WIN32)
+					else if (strcmp(host_str, "0.0.0.0") == 0)
+						strcpy(host_str, "127.0.0.1");
+					else if (strcmp(host_str, "::") == 0)
+						strcpy(host_str, "::1");
+#endif
+
+					/*
+					 * We need to set connect_timeout otherwise on Windows
+					 * the Service Control Manager (SCM) will probably
+					 * timeout first.
+					 */
+					snprintf(connstr, sizeof(connstr),
+					"dbname=postgres port=%d host='%s' connect_timeout=5 options=%s",
+							 portnum, host_str, backend_options);
+				}
 
 				if (pmStartMode == IS_UTILITY)
 				{
@@ -736,9 +809,15 @@ wait_for_postmaster_start(pgpid_t pm_pid, bool do_checkpoint)
 						strcmp(pmstatus, PM_STATUS_STANDBY) == 0 ||
 						strcmp(pmstatus, PM_STATUS_WALRECV_STARTED_STREAMING) == 0)
 					{
-						/* postmaster is done starting up */
-						free_readfile(optlines);
-						return POSTMASTER_READY;
+						ping = PQping(connstr);
+
+						if (ping == PQPING_OK || ping == PQPING_NO_ATTEMPT ||
+							ping == PQPING_MIRROR_READY)
+						{
+							/* postmaster is done starting up */
+							free_readfile(optlines);
+							return POSTMASTER_READY;
+						}
 					}
 				}
 				else /* I'm one of coordinator, standby-coor, primary, mirror */
@@ -746,9 +825,15 @@ wait_for_postmaster_start(pgpid_t pm_pid, bool do_checkpoint)
 					if (strcmp(pmstatus, pmReadyStatuses[pmStartMode]) == 0 ||
 						(gp_mirror_fast_wait && pmStartMode == IS_MIRROR && strcmp(pmstatus, PM_STATUS_STANDBY) == 0))
 					{
-						/* postmaster is done starting up */
-						free_readfile(optlines);
-						return POSTMASTER_READY;
+						ping = PQping(connstr);
+
+						if (ping == PQPING_OK || ping == PQPING_NO_ATTEMPT ||
+							ping == PQPING_MIRROR_READY)
+						{
+							/* postmaster is done starting up */
+							free_readfile(optlines);
+							return POSTMASTER_READY;
+						}
 					}
 				}
 			}
