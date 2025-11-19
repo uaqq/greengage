@@ -24,8 +24,8 @@ Feature: gpactivatestandby
         And verify the standby coordinator entries in catalog
         When there is a "heap" table "foobar" in "postgres" with data
         And the user runs "gpconfig -c recovery_end_command -v "'sleep 5'" --skipvalidation"
-        And the coordinator goes down
-        And the standby coordinator goes down
+        And the coordinator fast goes down
+        And the standby coordinator fast goes down
         And the user runs gpactivatestandby with options " "
         Then gpactivatestandby should return a return code of 2
         And the user runs gpactivatestandby with options "-f"
