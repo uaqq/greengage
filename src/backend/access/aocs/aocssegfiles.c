@@ -962,11 +962,15 @@ UpdateAOCSFileSegInfo(AOCSInsertDesc idesc)
 									&null[Anum_pg_aocs_vpinfo - 1]);
 
 	Assert(!null[Anum_pg_aocs_vpinfo - 1]);
-	struct varlena *v = (struct varlena *) DatumGetPointer(d_tmp);
-	struct varlena *dv = pg_detoast_datum(v);
 
-	Assert(VARSIZE(dv) == aocs_vpinfo_size(nvp));
-	AOCSVPInfo *oldvpinfo = (AOCSVPInfo *) dv;
+	AOCSFileSegInfo *seginfo;
+	seginfo = (AOCSFileSegInfo *) palloc0(aocsfileseginfo_size(nvp));
+
+	deformAOCSVPInfo(prel,
+					 (struct varlena *) DatumGetPointer(d_tmp),
+					 seginfo);
+
+	AOCSVPInfo *oldvpinfo = &seginfo->vpinfo;
 
 	/*
 	 * Number of columns fetched from vpinfo should match number of attributes
@@ -1012,11 +1016,6 @@ UpdateAOCSFileSegInfo(AOCSInsertDesc idesc)
 		}
 	}
 
-	if (dv != v)
-	{
-		pfree(dv);
-	}
-
 	d[Anum_pg_aocs_vpinfo - 1] = PointerGetDatum(vpinfo);
 	null[Anum_pg_aocs_vpinfo - 1] = false;
 	repl[Anum_pg_aocs_vpinfo - 1] = true;
@@ -1027,6 +1026,7 @@ UpdateAOCSFileSegInfo(AOCSInsertDesc idesc)
 
 	pfree(newtup);
 	pfree(vpinfo);
+	pfree(seginfo);
 
 	systable_endscan(scan);
 	heap_close(segrel, RowExclusiveLock);
