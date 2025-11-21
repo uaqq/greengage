@@ -34,6 +34,8 @@ Feature: gpactivatestandby
         And verify that table "foobar" in "postgres" has "2190" rows
         And verify that gpstart on original coordinator fails due to lower Timeline ID
         And clean up and revert back to original coordinator
+        And the user runs "gpconfig -r recovery_end_command"
+        And the user runs "gpstop -u"
 
     Scenario: gpactivatestandby should fail when given invalid data directory
         Given the database is running
