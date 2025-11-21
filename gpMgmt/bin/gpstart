@@ -422,7 +422,7 @@ class GpStart:
         logger.info("Obtaining Segment details from coordinator...")
         self.dburl = dbconn.DbURL(port=self.port, dbname='template1')
 
-        retry = SEGMENT_TIMEOUT_DEFAULT
+        retry = self.timeout
         while retry:
             try:
                 with closing(dbconn.connect(self.dburl, utility=True)) as conn:
