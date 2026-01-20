@@ -12,6 +12,7 @@
 # Location Functions
 #******************************************************************************
 #Check that SHELL is Bash
+exit 1
 if [ -z $BASH ]; then
 	echo "[FATAL]:-Scripts must be executed using the Bash shell"
 	exit 2
@@ -282,7 +283,7 @@ REMOTE_EXECUTE_AND_GET_OUTPUT () {
   OUTPUT=$( $TRUSTED_SHELL "$HOST" "$CMD" | $AWK '/^GP_DELIMITER_FOR_IGNORING_BASH_BANNER/ {seen = 1} seen {print}' | $TAIL -n +2 )
   RETVAL=$?
   if [ $RETVAL -ne 0 ]; then
- 
+
      LOG_MSG "[FATAL]:- Command $CMD on $HOST failed with error status $RETVAL" 2
   else
      LOG_MSG "[INFO]:-Completed $TRUSTED_SHELL $HOST $CMD"
