@@ -12,7 +12,6 @@
 # Location Functions
 #******************************************************************************
 #Check that SHELL is Bash
-exit 1
 if [ -z $BASH ]; then
 	echo "[FATAL]:-Scripts must be executed using the Bash shell"
 	exit 2
