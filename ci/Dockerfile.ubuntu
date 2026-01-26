@@ -5,6 +5,10 @@ ARG UBUNTU_UPDATES_MIRROR=http://archive.ubuntu.com/ubuntu
 ARG UBUNTU_BACKPORTS_MIRROR=http://archive.ubuntu.com/ubuntu
 ARG UBUNTU_SECURITY_MIRROR=http://security.ubuntu.com/ubuntu
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /home/gpadmin
+
 COPY README.Ubuntu.bash ./
 
 RUN set -eux; \
@@ -14,7 +18,6 @@ RUN set -eux; \
       -e "s|http://archive.ubuntu.com/ubuntu/ jammy-backports |${UBUNTU_BACKPORTS_MIRROR}/ jammy-backports |g" \
       -e "s|http://security.ubuntu.com/ubuntu/ jammy-security |${UBUNTU_SECURITY_MIRROR}/ jammy-security |g" \
       /etc/apt/sources.list; \
-    export DEBIAN_FRONTEND=noninteractive; \
     ./README.Ubuntu.bash; \
     rm README.Ubuntu.bash; \
 # The en_US.UTF-8 locale is needed to run GPDB
@@ -24,13 +27,29 @@ RUN set -eux; \
 # Alter precedence in favor of IPv4 during resolving
     echo 'precedence ::ffff:0:0/96  100' >> /etc/gai.conf; \
 # Packages for tests
-    apt install -y rsync iproute2 fakeroot lsof sudo python3.11 python3.11-dev openjdk-17-jdk libipc-run-perl; \
-    apt install -y protobuf-compiler; \
-# Install allure-behave for behave tests
-    pip3 install pytest gsutil behave~=1.2.6 coverage~=4.5 'mock<=5.0.0' allure-behave==2.4.0 protobuf==3.20.0; \
-    pip3 cache purge
+    apt-get install -y --no-install-recommends \
+      fakeroot \
+      iproute2 \
+      libipc-run-perl \
+      lsof \
+      openjdk-17-jre-headless \
+      protobuf-compiler \
+      python3.11 \
+      python3.11-dev \
+      rsync \
+      sudo \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /home/gpadmin
+FROM base AS python_deps
+
+RUN pip3 install --no-cache-dir --prefer-binary \
+    allure-behave==2.4.0 \
+    behave~=1.2.6 \
+    coverage~=4.5 \
+    gsutil \
+    'mock<=5.0.0' \
+    protobuf==3.20.0 \
+    pytest
 
 FROM base AS build
 
@@ -56,3 +75,4 @@ RUN rm -rf gpdb_src/.git/
 FROM base AS test
 COPY --from=code /home/gpadmin/gpdb_src gpdb_src
 COPY --from=build /home/gpadmin/bin_gpdb /home/gpadmin/bin_gpdb
+COPY --from=python_deps /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
