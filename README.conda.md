@@ -7,9 +7,10 @@ features provided by Anaconda.  Note that GPDB only supports Python 2.7 now.
 Although plpython might be built with Python 3.x, other Python tools in GPDB
 won't work with Python 3.x.
 
+
 You can try following steps to run Anaconda with GPDB from source code.
 
-## Install Anaconda. 
+## Install Anaconda.
 We use miniconda here.
 
 	wget  https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
@@ -24,10 +25,10 @@ IMPORTANT: Add this path to head of PATH environment, so that Anaconda become th
 	export PATH=/PATH/TO/CONDAHOME/bin:$PATH
 
 ## Install related tools
-Following instructions are for Centos/RHEL/Fedora as example. 
+Following instructions are for Centos/RHEL/Fedora as example.
 	sudo yum install git
 	sudo yum groupinstall "Development tools"
-	sudo yum install curl-devel bzip2-devel openssl-devel perl-ExtUtils-Embed   libxml2-devel  openldap-devel  pam pam-devel  perl-devel  readline-devel 
+	sudo yum install curl-devel bzip2-devel openssl-devel perl-ExtUtils-Embed   libxml2-devel  openldap-devel  pam pam-devel  perl-devel  readline-devel
 
 The python-devel is not required here because it is provided by Anaconda.
 
