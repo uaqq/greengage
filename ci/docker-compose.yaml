@@ -9,8 +9,7 @@ x-common-service: &common-service
   entrypoint: >
     sleep infinity
 
-x-common-volumes: &common-volumes
-  - "$PWD/ssh_keys:/home/gpadmin/.ssh"
+x-ssh-volume: &ssh-volume "$PWD/ssh_keys:/home/gpadmin/.ssh"
 
 services:
   cdw:
@@ -18,7 +17,7 @@ services:
     working_dir: /home/gpadmin
     hostname: cdw
     volumes:
-      - *common-volumes
+      - *ssh-volume
       - "$PWD/allure-results:/tmp/allure-results"
       - "$PWD/logs_cdw:/logs"
   sdw1:
@@ -26,7 +25,7 @@ services:
     privileged: true
     hostname: sdw1
     volumes:
-      - *common-volumes
+      - *ssh-volume
       - "$PWD/logs_sdw1:/logs"
   sdw2:
     <<: [*common-service]
@@ -38,5 +37,5 @@ services:
     <<: [*common-service]
     hostname: sdw3
     volumes:
-      - *common-volumes
+      - *ssh-volume
       - "$PWD/logs_sdw3:/logs"
