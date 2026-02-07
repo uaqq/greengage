@@ -10,7 +10,7 @@ x-common-service: &common-service
     sleep infinity
 
 x-common-volumes: &common-volumes
-  - $PWD/ssh_keys:/home/gpadmin/.ssh
+  - "$PWD/ssh_keys:/home/gpadmin/.ssh"
 
 services:
   cdw:
