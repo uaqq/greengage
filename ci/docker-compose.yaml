@@ -1,55 +1,37 @@
+x-common-service: &common-service
+  image: "${IMAGE}"
+  privileged: true
+  sysctls:
+    kernel.sem: 500 1024000 200 4096
+  init: true
+  ulimits:
+    nofile: 65535
+  entrypoint: >
+    sleep infinity
+
+x-common-volumes: &common-volumes
+  volumes:
+    - $PWD/ssh_keys:/home/gpadmin/.ssh
+
 services:
   cdw:
-    image: "${IMAGE}"
+    <<: [*common-service, *common-volumes]
     working_dir: /home/gpadmin
     hostname: cdw
     volumes:
-      - "$PWD/ssh_keys/id_rsa:/home/gpadmin/.ssh/id_rsa"
-      - "$PWD/ssh_keys/id_rsa.pub:/home/gpadmin/.ssh/id_rsa.pub"
       - "$PWD/allure-results:/tmp/allure-results"
       - "$PWD/logs_cdw:/logs"
-    privileged: true
-    sysctls:
-      kernel.sem: 500 1024000 200 4096
-    init: true
-    entrypoint: >
-      sleep infinity
   sdw1:
-    image: "${IMAGE}"
+    <<: [*common-service, *common-volumes]
     privileged: true
     hostname: sdw1
     volumes:
-      - "$PWD/ssh_keys/id_rsa:/home/gpadmin/.ssh/id_rsa"
-      - "$PWD/ssh_keys/id_rsa.pub:/home/gpadmin/.ssh/id_rsa.pub"
       - "$PWD/logs_sdw1:/logs"
-    sysctls:
-      kernel.sem: 500 1024000 200 4096
-    init: true
-    entrypoint: >
-      sleep infinity
   sdw2:
-    image: "${IMAGE}"
-    privileged: true
+    <<: [*common-service, *common-volumes]
     hostname: sdw2
-    volumes:
-      - "$PWD/ssh_keys/id_rsa:/home/gpadmin/.ssh/id_rsa"
-      - "$PWD/ssh_keys/id_rsa.pub:/home/gpadmin/.ssh/id_rsa.pub"
-      - "$PWD/logs_sdw2:/logs"
-    sysctls:
-      kernel.sem: 500 1024000 200 4096
-    init: true
-    entrypoint: >
-      sleep infinity
+
   sdw3:
-    image: "${IMAGE}"
-    privileged: true
+    <<: [*common-service, *common-volumes]
     hostname: sdw3
-    volumes:
-      - "$PWD/ssh_keys/id_rsa:/home/gpadmin/.ssh/id_rsa"
-      - "$PWD/ssh_keys/id_rsa.pub:/home/gpadmin/.ssh/id_rsa.pub"
-      - "$PWD/logs_sdw3:/logs"
-    sysctls:
-      kernel.sem: 500 1024000 200 4096
-    init: true
-    entrypoint: >
-      sleep infinity
+
