@@ -10,27 +10,33 @@ x-common-service: &common-service
     sleep infinity
 
 x-common-volumes: &common-volumes
-  volumes:
-    - $PWD/ssh_keys:/home/gpadmin/.ssh
+  - $PWD/ssh_keys:/home/gpadmin/.ssh
 
 services:
   cdw:
-    <<: [*common-service, *common-volumes]
+    <<: [*common-service]
     working_dir: /home/gpadmin
     hostname: cdw
     volumes:
+      - *common-volumes
       - "$PWD/allure-results:/tmp/allure-results"
       - "$PWD/logs_cdw:/logs"
   sdw1:
-    <<: [*common-service, *common-volumes]
+    <<: [*common-service]
     privileged: true
     hostname: sdw1
     volumes:
+      - *common-volumes
       - "$PWD/logs_sdw1:/logs"
   sdw2:
-    <<: [*common-service, *common-volumes]
+    <<: [*common-service]
     hostname: sdw2
-
+    volumes:
+      - *common-volumes
+      - "$PWD/logs_sdw2:/logs"
   sdw3:
-    <<: [*common-service, *common-volumes]
+    <<: [*common-service]
     hostname: sdw3
+    volumes:
+      - *common-volumes
+      - "$PWD/logs_sdw3:/logs"
