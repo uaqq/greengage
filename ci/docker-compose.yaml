@@ -9,33 +9,33 @@ x-common-service: &common-service
   entrypoint: >
     sleep infinity
 
-x-ssh-volume: &ssh-volume $PWD/ssh_keys:/home/gpadmin/.ssh
+x-common-volumes: &common-volumes
+  volumes:
+    - $PWD/ssh_keys/id_rsa:/home/gpadmin/.ssh/id_rsa
+    - $PWD/ssh_keys/id_rsa.pub:/home/gpadmin/.ssh/id_rsa.pub
+    - $PWD/sqldump/dump.sql:/home/gpadmin/sqldump/dump.sql
 
 services:
   cdw:
-    <<: [*common-service]
+    <<: [*common-service, *common-volumes]
     working_dir: /home/gpadmin
     hostname: cdw
     volumes:
-      - *ssh-volume
-      - "$PWD/allure-results:/tmp/allure-results"
-      - "$PWD/logs_cdw:/logs"
+      - $PWD/allure-results:/tmp/allure-results
+      - $PWD/logs_cdw:/logs
+
   sdw1:
-    <<: [*common-service]
-    privileged: true
+    <<: [*common-service, *common-volumes]
     hostname: sdw1
     volumes:
-      - *ssh-volume
-      - "$PWD/logs_sdw1:/logs"
+      - $PWD/logs_sdw1:/logs
+
   sdw2:
-    <<: [*common-service]
+    <<: [*common-service, *common-volumes]
     hostname: sdw2
-    volumes:
-      - *ssh-volume
-      - "$PWD/logs_sdw2:/logs"
+      - $PWD/logs_sdw2:/logs
+
   sdw3:
-    <<: [*common-service]
+    <<: [*common-service, *common-volumes]
     hostname: sdw3
-    volumes:
-      - *ssh-volume
-      - "$PWD/logs_sdw3:/logs"
+      - $PWD/logs_sdw3:/logs
