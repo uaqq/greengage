@@ -9,6 +9,7 @@ logdir="$PWD/logs"
 logfile=".exitcode"
 
 function cleanup {
+  kill "$LOG_SYNC_PID" 2>/dev/null || true
   docker compose -p $project -f ci/docker-compose.yaml --env-file ci/.env down
 }
 
@@ -22,6 +23,66 @@ trap cleanup EXIT
 
 #install gpdb and setup gpadmin user
 bash ci/scripts/init_containers.sh $project cdw sdw1
+
+LOG_SYNC_INTERVAL=10
+LOG_ROOT="$PWD/logs"
+
+CDW_LOG_PATHS=(
+  "/home/gpadmin/gpAdminLogs"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/gpAdminLogs"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/qddir/demoDataDir-1/pg_log"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/standby/pg_log"
+  "/home/gpadmin/gpdb_src/src/test/isolation2/results/resgroup"
+  "/home/gpadmin/gpdb_src/src/test/isolation2/regression.diffs"
+)
+
+SDW1_LOG_PATHS=(
+  "/home/gpadmin/gpAdminLogs"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/gpAdminLogs"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast1/demoDataDir0/pg_log"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast2/demoDataDir1/pg_log"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast3/demoDataDir2/pg_log"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror1/demoDataDir0/pg_log"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror2/demoDataDir1/pg_log"
+  "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror3/demoDataDir2/pg_log"
+)
+
+copy_log_paths() {
+  local cid="$1"
+  local svc="$2"
+  shift 2
+  local paths=("$@")
+
+  local base="$LOG_ROOT/$svc"
+  mkdir -p "$base"
+
+  for src in "${paths[@]}"; do
+    dst="$base$src"
+    mkdir -p "$(dirname "$dst")"
+    docker cp "$cid:$src" "$dst" 2>/dev/null || true
+  done
+}
+
+sync_logs() {
+  while true; do
+    for svc in cdw sdw1; do
+      cid=$(docker compose -p "$project" ps -q "$svc" 2>/dev/null || true)
+      [ -z "$cid" ] && continue
+
+      case "$svc" in
+        cdw)
+          copy_log_paths "$cid" "$svc" "${CDW_LOG_PATHS[@]}"
+          ;;
+        sdw1)
+          copy_log_paths "$cid" "$svc" "${SDW1_LOG_PATHS[@]}"
+          ;;
+      esac
+    done
+    sleep "$LOG_SYNC_INTERVAL"
+  done
+}
+sync_logs &
+LOG_SYNC_PID=$!
 
 for service in 'cdw' 'sdw1'
 do
@@ -80,27 +141,4 @@ EOF
 # Missing file or invalid content will be interpreted as script failure.
 exitcode=$?
 echo "$exitcode" > "$logdir/$logfile"
-
-docker compose -p $project -f ci/docker-compose.yaml exec -T cdw bash -ex <<EOF
-  cd /home/gpadmin
-  tar -czf /logs/gpAdminLogs.tar.gz gpAdminLogs/
-  tar -czf /logs/gpAux.tar.gz gpdb_src/gpAux/gpdemo/datadirs/gpAdminLogs/
-  tar -czf /logs/pg_log.tar.gz gpdb_src/gpAux/gpdemo/datadirs/qddir/demoDataDir-1/pg_log/ gpdb_src/gpAux/gpdemo/datadirs/standby/pg_log
-  #regression.diffs may not exist if tests were successful
-  tar --ignore-failed-read -czf /logs/results.tar.gz gpdb_src/src/test/isolation2/results/resgroup/ gpdb_src/src/test/isolation2/regression.diffs
-EOF
-
-docker compose -p $project -f ci/docker-compose.yaml exec -T sdw1 bash -ex <<EOF
-  cd /home/gpadmin
-  tar -czf /logs/gpAdminLogs.tar.gz gpAdminLogs/
-  tar -czf /logs/gpAux.tar.gz gpdb_src/gpAux/gpdemo/datadirs/gpAdminLogs/
-  tar -czf /logs/pg_log.tar.gz \
-    gpdb_src/gpAux/gpdemo/datadirs/dbfast1/demoDataDir0/pg_log \
-    gpdb_src/gpAux/gpdemo/datadirs/dbfast2/demoDataDir1/pg_log \
-    gpdb_src/gpAux/gpdemo/datadirs/dbfast3/demoDataDir2/pg_log \
-    gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror1/demoDataDir0/pg_log \
-    gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror2/demoDataDir1/pg_log \
-    gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror3/demoDataDir2/pg_log
-EOF
-
 exit "$exitcode"
