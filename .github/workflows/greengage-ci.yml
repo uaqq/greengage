@@ -95,7 +95,7 @@ jobs:
       contents: read  # Explicit for default behavior
       packages: read  # Explicit for GHCR access clarity
       actions: write  # Required for artifact upload
-    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-tests-resgroup.yml@GG-180
+    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-tests-resgroup.yml@v13
     with:
       version: 6
       target_os: ${{ matrix.target_os }}
@@ -140,3 +140,4 @@ jobs:
       test_docker: ubuntu:22.04 # Docker Image  (e.g., ubuntu:22.04, ubuntu:noble) for deploy test. Skip if empty
     secrets:
       ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+
