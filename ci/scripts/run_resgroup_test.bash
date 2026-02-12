@@ -84,11 +84,6 @@ bash ci/scripts/init_containers.sh $project cdw sdw1
 # sync_logs &
 # LOG_SYNC_PID=$!
 
-for service in 'cdw' 'sdw1'; do
-  docker compose -p $project -f "$docker_compose_path" exec -T \
-    $service bash -c "nohup /bin/bash gpdb_src/ci/scripts/collect_resgroup_logs.bash"
-done
-
 for service in 'cdw' 'sdw1'
 do
   #grant access rights to group controllers
@@ -102,6 +97,11 @@ done
 #create cluster
 docker compose -p $project -f ci/docker-compose.yaml exec -T cdw \
  bash -c "source gpdb_src/concourse/scripts/common.bash && HOSTS_LIST='sdw1' make_cluster"
+
+for service in 'cdw' 'sdw1'; do
+  docker compose -p $project -f "$docker_compose_path" exec -T \
+    $service bash -c "nohup /bin/bash gpdb_src/ci/scripts/collect_resgroup_logs.bash"
+done
 
 #disable exit on error to allow log collection regardless of return code
 set +e
@@ -141,6 +141,9 @@ EOF1
             exit \$errcode
         )
 EOF
+
+docker compose -p $project -f ci/docker-compose.yaml exec -T cdw bash -c 'find /logs -type f -print'
+docker compose -p $project -f ci/docker-compose.yaml exec -T sdw1 bash -c 'find /logs -type f -print'
 
 # Cloud-init monitors will check for this file's existence and content.
 # Missing file or invalid content will be interpreted as script failure.

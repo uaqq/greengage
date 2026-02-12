@@ -4,14 +4,16 @@ set -eox pipefail
 echo "[log-sync] started on $(hostname) at $(date)" >&2
 
 LOG_SYNC_INTERVAL=10
-HOST_LOG_DIR="/logs/$(hostname)"
+HOST_LOG_DIR="/logs"
+DIFFS_LIST_PATH=$(mktemp -d)/diffs.list
+LOGS_LIST_PATH=$(mktemp -d)/logs.list
 
-mkdir -p /logs/$(hostname)
-cat > diffs.list <<EOF
+mkdir -p $HOST_LOG_DIR
+cat > "$DIFFS_LIST_PATH" <<EOF
 results/resgroup/
 regression.diffs
 EOF
-cat > logs.list <<EOF
+cat > $LOGS_LIST_PATH <<EOF
 gpAdminLogs/
 standby/pg_log/
 qddir/demoDataDir-1/pg_log/
@@ -30,9 +32,9 @@ sync_dir() {
   local files_from="$3"
 
   if [ -n "$files_from" ]; then
-    [ -d "$src" ] && rsync -a --ignore-missing-args --whole-file --inplace --files-from="$files_from" "$src" "$dst" || true
+    [ -d "$src" ] && rsync -av --ignore-missing-args --whole-file --inplace --files-from="$files_from" "$src" "$dst" || true
   else
-    [ -d "$src" ] && rsync -a --ignore-missing-args --whole-file --inplace "$src" "$dst" || true
+    [ -d "$src" ] && rsync -av --ignore-missing-args --whole-file --inplace "$src" "$dst" || true
   fi
 }
 
@@ -44,12 +46,12 @@ done &
 
 # sync gpdb_src/gpAux/gpdemo/datadirs
 while true; do
-  sync_dir "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs" "$HOST_LOG_DIR" "logs.list"
+  sync_dir "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs" "$HOST_LOG_DIR" "$LOGS_LIST_PATH"
   sleep $LOG_SYNC_INTERVAL
 done &
 
 # sync diffs
 while true; do
-  sync_dir "/home/gpadmin/gpdb_src/src/test/isolation2" "$HOST_LOG_DIR" "diffs.list"
+  sync_dir "/home/gpadmin/gpdb_src/src/test/isolation2" "$HOST_LOG_DIR" "$DIFFS_LIST_PATH"
   sleep $LOG_SYNC_INTERVAL
 done &
