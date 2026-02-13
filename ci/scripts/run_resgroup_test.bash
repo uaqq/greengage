@@ -98,10 +98,10 @@ done
 docker compose -p $project -f ci/docker-compose.yaml exec -T cdw \
  bash -c "source gpdb_src/concourse/scripts/common.bash && HOSTS_LIST='sdw1' make_cluster"
 
-#for service in 'cdw' 'sdw1'; do
-#  docker compose -p $project -f "$docker_compose_path" exec -T \
-#    $service bash -c "nohup /bin/bash gpdb_src/ci/scripts/collect_resgroup_logs.bash"
-#done
+for service in 'cdw' 'sdw1'; do
+ docker compose -p $project -f "$docker_compose_path" exec -T \
+   $service bash -c "nohup /bin/bash gpdb_src/ci/scripts/collect_resgroup_logs.bash"
+done
 
 #disable exit on error to allow log collection regardless of return code
 set +e
