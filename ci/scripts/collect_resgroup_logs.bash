@@ -24,25 +24,11 @@ LOGS_DIR=(
   "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast_mirror2/demoDataDir1/pg_log"
   "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast_mirror3/demoDataDir2/pg_log"
 )
-# check for directory exists
-sync_dir() {
-  local src="$1"
-  local dst="$2"
-  if [ -d "$src" ]; then
-    mkdir -p "$dst"
-    rsync -a --ignore-missing-args --whole-file --inplace "$src/" "$dst/" || true
-  elif [ -f "$src" ]; then
-    mkdir -p "$(dirname "$dst")"
-    rsync -a --ignore-missing-args --whole-file --inplace "$src" "$dst"
-  fi
-}
 
 while true; do
-  for src in "${LOGS_DIR[@]}"; do
-    rel=${src#"$BASE_DIR/"}
-    dst="$HOST_LOG_DIR/$rel"
-    sync_dir "$src" "$dst"
-  done
+  rsync -a --relative --inplace --whole-file \
+    --ignore-missing-args \
+    "${LOGS_DIR[@]}" \
+    "$HOST_LOG_DIR/" 2>/dev/null || true
   sleep $LOG_SYNC_INTERVAL
 done &
-
