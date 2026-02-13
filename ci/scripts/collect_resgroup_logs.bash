@@ -25,10 +25,19 @@ LOGS_DIR=(
   "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast_mirror3/demoDataDir2/pg_log"
 )
 
-while true; do
+sync_logs(){
   rsync -a --relative --inplace --whole-file \
     --ignore-missing-args \
     "${LOGS_DIR[@]}" \
     "$HOST_LOG_DIR/" 2>/dev/null || true
+}
+
+if [[ "$LOG_SYNC_MODE" = "once" ]]; then
+  sync_logs
+  exit 0
+fi
+
+while true; do
+  sync_logs
   sleep $LOG_SYNC_INTERVAL
 done &

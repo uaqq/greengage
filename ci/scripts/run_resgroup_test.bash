@@ -142,8 +142,8 @@ EOF1
         )
 EOF
 
-#docker compose -p $project -f ci/docker-compose.yaml exec -T cdw bash -c '/bin/bash gpdb_src/ci/scripts/collect_resgroup_logs_once.bash'
-#docker compose -p $project -f ci/docker-compose.yaml exec -T sdw1 bash -c '/bin/bash gpdb_src/ci/scripts/collect_resgroup_logs_once.bash'
+docker compose -p $project -f ci/docker-compose.yaml exec -T cdw bash -c '/bin/bash LOG_SYNC_MODE=once gpdb_src/ci/scripts/collect_resgroup_logs.bash'
+docker compose -p $project -f ci/docker-compose.yaml exec -T sdw1 bash -c '/bin/bash LOG_SYNC_MODE=once gpdb_src/ci/scripts/collect_resgroup_logs.bash'
 
 # Cloud-init monitors will check for this file's existence and content.
 # Missing file or invalid content will be interpreted as script failure.
