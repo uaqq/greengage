@@ -5,53 +5,44 @@ echo "[log-sync] started on $(hostname) at $(date)" >&2
 
 LOG_SYNC_INTERVAL=10
 HOST_LOG_DIR="/logs"
-DIFFS_LIST_PATH=$(mktemp -d)/diffs.list
-LOGS_LIST_PATH=$(mktemp -d)/logs.list
+BASE_DIR="/home/gpadmin"
+GPDB_SRC_DIR="gpdb_src"
 
 mkdir -p $HOST_LOG_DIR
-cat > "$DIFFS_LIST_PATH" <<EOF
-results/resgroup/
-regression.diffs
-EOF
-cat > $LOGS_LIST_PATH <<EOF
-gpAdminLogs/
-standby/pg_log/
-qddir/demoDataDir-1/pg_log/
-dbfast1/demoDataDir0/pg_log/
-dbfast2/demoDataDir1/pg_log/
-dbfast3/demoDataDir2/pg_log/
-dbfast_mirror1/demoDataDir0/pg_log/
-dbfast_mirror2/demoDataDir1/pg_log/
-dbfast_mirror3/demoDataDir2/pg_log/
-EOF
 
+LOGS_DIR=(
+  "${BASE_DIR}/gpAdminLogs"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/gpAdminLogs"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/qddir/demoDataDir-1/pg_log"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/standby/pg_log"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/src/test/isolation2/results/resgroup"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/src/test/isolation2/regression.diffs"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast1/demoDataDir0/pg_log"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast2/demoDataDir1/pg_log"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast3/demoDataDir2/pg_log"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast_mirror1/demoDataDir0/pg_log"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast_mirror2/demoDataDir1/pg_log"
+  "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/dbfast_mirror3/demoDataDir2/pg_log"
+)
 # check for directory exists
 sync_dir() {
   local src="$1"
   local dst="$2"
-  local files_from="$3"
-
-  if [ -n "$files_from" ]; then
-    [ -d "$src" ] && rsync -av --ignore-missing-args --whole-file --inplace --files-from="$files_from" "$src" "$dst" || true
-  else
-    [ -d "$src" ] && rsync -av --ignore-missing-args --whole-file --inplace "$src" "$dst" || true
+  if [ -d "$src" ]; then
+    mkdir -p "$dst"
+    rsync -a --ignore-missing-args --whole-file --inplace "$src/" "$dst/" || true
+  elif [ -f "$src" ]; then
+    mkdir -p "$(dirname "$dst")"
+    rsync -a --ignore-missing-args --whole-file --inplace "$src" "$dst"
   fi
 }
 
-# sync gpAdminLogs
 while true; do
-  sync_dir "/home/gpadmin/gpAdminLogs" "$HOST_LOG_DIR"
+  for src in "${LOGS_DIR[@]}"; do
+    rel=${src#"$BASE_DIR/"}
+    dst="$HOST_LOG_DIR/$rel"
+    sync_dir "$src" "$dst"
+  done
   sleep $LOG_SYNC_INTERVAL
 done &
 
-# sync gpdb_src/gpAux/gpdemo/datadirs
-while true; do
-  sync_dir "/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs" "$HOST_LOG_DIR" "$LOGS_LIST_PATH"
-  sleep $LOG_SYNC_INTERVAL
-done &
-
-# sync diffs
-while true; do
-  sync_dir "/home/gpadmin/gpdb_src/src/test/isolation2" "$HOST_LOG_DIR" "$DIFFS_LIST_PATH"
-  sleep $LOG_SYNC_INTERVAL
-done &
