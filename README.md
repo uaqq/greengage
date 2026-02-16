@@ -1,4 +1,3 @@
-
 ![Greengage](ggdb_100x100.png)
 
 Greengage Database (GPDB) is an advanced, fully featured, open
@@ -39,7 +38,7 @@ Follow [these macOS steps](README.macOS.md) for getting your system ready for GP
 Follow [appropriate linux steps](README.linux.md) for getting your system ready for GPDB
 
 ### Downloading submodules
-Make sure that you download submodules. To do this, use `git clone --recurse-submodules` 
+Make sure that you download submodules. To do this, use `git clone --recurse-submodules`
 when downloading the source code. If you want to update the submodules, run:
 ```bash
 git submodule update --init --recursive --force
@@ -47,7 +46,7 @@ git submodule update --init --recursive --force
 
 ### Build the database
 
-The recommended way to build the database is to use build system located in the gpAux 
+The recommended way to build the database is to use build system located in the gpAux
 directory, which is also used for CI testing and building packages.
 
 To create optimized release build, use the following:
@@ -74,7 +73,7 @@ Start demo cluster:
 make create-demo-cluster
 ```
 
-To use the demo cluster, source the environment variables from gpdemo-env.sh, which contains 
+To use the demo cluster, source the environment variables from gpdemo-env.sh, which contains
 __PGPORT__ and __MASTER_DATA_DIRECTORY__ values:
 
 ```
