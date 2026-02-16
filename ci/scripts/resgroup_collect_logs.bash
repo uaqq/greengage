@@ -10,7 +10,7 @@ GPDB_SRC_DIR="gpdb_src"
 
 mkdir -p $HOST_LOG_DIR
 
-LOGS_DIR=(
+LOG_DIRS=(
   "${BASE_DIR}/gpAdminLogs"
   "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/gpAdminLogs"
   "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/qddir/demoDataDir-1/pg_log"
@@ -28,7 +28,7 @@ LOGS_DIR=(
 sync_logs(){
   rsync -a --relative --inplace --whole-file \
     --ignore-missing-args \
-    "${LOGS_DIR[@]}" \
+    "${LOG_DIRS[@]}" \
     "$HOST_LOG_DIR/" 2>/dev/null || true
 }
 
