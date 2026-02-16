@@ -82,9 +82,9 @@ EOF1
 EOF
 
 docker compose -p $project -f "$docker_compose_path" exec -T cdw \
-  bash -c '/bin/bash LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
+  bash -c 'LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
 docker compose -p $project -f "$docker_compose_path" exec -T sdw1 \
-  bash -c '/bin/bash LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
+  bash -c 'LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
 
 # Cloud-init monitors will check for this file's existence and content.
 # Missing file or invalid content will be interpreted as script failure.
