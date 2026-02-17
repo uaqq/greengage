@@ -10,22 +10,6 @@ GPDB_SRC_DIR="gpdb_src"
 
 mkdir -p $HOST_LOG_DIR
 
-LOG_PATHS_PARAMS=(
-  "./ d gpAdminLogs"
-  "gpdb_src/src/test/ d results"
-  "gpdb_src/src/test/ f regression.diffs"
-  "gpdb_src/gpAux/gpdemo/datadirs/ d pg_log"
-)
-
-LOG_DIRS_TEST=$(
-  for param in "${LOG_PATHS_PARAMS[@]}"; do
-    read -r path type name <<< "$param"
-    find $path -name $name -type $type
-  done
-)
-
-echo $LOG_DIRS_TEST
-
 LOG_DIRS=(
   "${BASE_DIR}/gpAdminLogs"
   "${BASE_DIR}/${GPDB_SRC_DIR}/gpAux/gpdemo/datadirs/gpAdminLogs"
