@@ -8,7 +8,23 @@ HOST_LOG_DIR="/logs"
 BASE_DIR="/home/gpadmin"
 GPDB_SRC_DIR="gpdb_src"
 
-mkdir -p $HOST_LOG_DIR
+mkdir -p "$HOST_LOG_DIR"
+
+LOG_PATHS_PARAMS=(
+  "./ d gpAdminLogs"
+  "gpdb_src/src/test/ d results"
+  "gpdb_src/src/test/ f regression.diffs"
+  "gpdb_src/gpAux/gpdemo/datadirs/ d pg_log"
+)
+
+mapfile -t LOG_DIRS_TEST < <(
+  for param in "${LOG_PATHS_PARAMS[@]}"; do
+    read -r path type name <<< "$param"
+    find "$path" -name "$name" -type "$type"
+  done
+)
+
+declare -p LOG_DIRS_TEST
 
 LOG_DIRS=(
   "${BASE_DIR}/gpAdminLogs"
@@ -28,7 +44,7 @@ LOG_DIRS=(
 sync_logs(){
   rsync -a --relative --inplace --whole-file \
     --ignore-missing-args \
-    "${LOG_DIRS[@]}" \
+    "${LOG_DIRS_TEST[@]}" \
     "$HOST_LOG_DIR/" 2>/dev/null || true
 }
 
