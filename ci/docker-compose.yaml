@@ -18,14 +18,36 @@ services:
       - ${PWD}/allure-results:/tmp/allure-results
       - ${PWD}/ssh_keys/id_rsa.pub:/home/gpadmin/.ssh/id_rsa.pub
       - ${PWD}/ssh_keys/id_rsa:/home/gpadmin/.ssh/id_rsa
-      - ${PWD}/logs_cdw:/logs
+      - ${PWD}/logs_cdw/gpAdminLogs:/home/gpadmin/gpAdminLogs
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/gpAdminLogs
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/qddir/demoDataDir-1
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/standby
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast1/demoDataDir0
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast2/demoDataDir1
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast3/demoDataDir2
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror1/demoDataDir0
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror2/demoDataDir1
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror3/demoDataDir2
+      - ${PWD}/logs_cdw/isolation2:/home/gpadmin/gpdb_src/src/test/isolation2/results
+      - ${PWD}/logs_cdw/isolation2:/home/gpadmin/gpdb_src/src/test/isolation2/regression.diffs
   sdw1:
     <<: *common-service
     hostname: sdw1
     volumes:
       - ${PWD}/ssh_keys/id_rsa.pub:/home/gpadmin/.ssh/id_rsa.pub
       - ${PWD}/ssh_keys/id_rsa:/home/gpadmin/.ssh/id_rsa
-      - ${PWD}/logs_sdw1:/logs
+      - ${PWD}/logs_cdw/gpAdminLogs:/home/gpadmin/gpAdminLogs
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/gpAdminLogs
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/qddir/demoDataDir-1
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/standby
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast1/demoDataDir0
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast2/demoDataDir1
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast3/demoDataDir2
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror1/demoDataDir0
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror2/demoDataDir1
+      - ${PWD}/logs_cdw/datadirs:/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/dbfast_mirror3/demoDataDir2
+      - ${PWD}/logs_cdw/isolation2:/home/gpadmin/gpdb_src/src/test/isolation2/results
+      - ${PWD}/logs_cdw/isolation2:/home/gpadmin/gpdb_src/src/test/isolation2/regression.diffs
   sdw2:
     <<: *common-service
     hostname: sdw2

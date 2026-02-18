@@ -37,10 +37,10 @@ done
 docker compose -p $project -f "$docker_compose_path" exec -T cdw \
  bash -c "source gpdb_src/concourse/scripts/common.bash && HOSTS_LIST='sdw1' make_cluster"
 
-for service in 'cdw' 'sdw1'; do
- docker compose -p $project -f "$docker_compose_path" exec -T \
-   $service bash -c "nohup /bin/bash gpdb_src/ci/scripts/resgroup_collect_logs.bash"
-done
+# for service in 'cdw' 'sdw1'; do
+#  docker compose -p $project -f "$docker_compose_path" exec -T \
+#    $service bash -c "nohup /bin/bash gpdb_src/ci/scripts/resgroup_collect_logs.bash"
+# done
 
 #disable exit on error to allow log collection regardless of return code
 set +e
@@ -81,10 +81,10 @@ EOF1
         )
 EOF
 
-docker compose -p $project -f "$docker_compose_path" exec -T cdw \
-  bash -c 'LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
-docker compose -p $project -f "$docker_compose_path" exec -T sdw1 \
-  bash -c 'LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
+# docker compose -p $project -f "$docker_compose_path" exec -T cdw \
+#   bash -c 'LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
+# docker compose -p $project -f "$docker_compose_path" exec -T sdw1 \
+#   bash -c 'LOG_SYNC_MODE=once gpdb_src/ci/scripts/resgroup_collect_logs.bash'
 
 # Cloud-init monitors will check for this file's existence and content.
 # Missing file or invalid content will be interpreted as script failure.
