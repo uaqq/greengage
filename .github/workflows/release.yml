@@ -1,0 +1,70 @@
+name: Build signed APT repo
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install tools
+        run: |
+          sudo apt update
+          sudo apt install -y aptly gnupg
+
+      - name: Checkout Greengage repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          submodules: recursive
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.APT_GPG_PRIVATE_KEY }}" | \
+            gpg --batch --yes --pinentry-mode loopback --import
+          gpg --list-secret-keys --keyid-format LONG
+
+      - name: Download release packages
+        run: |
+          mkdir debs
+          gh release download ${{ github.event.release.tag_name }} \
+            --pattern "*.deb" \
+            --dir debs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Init aptly
+        run: |
+          mkdir -p ~/.aptly
+
+      - name: Create repo
+        run: |
+          aptly repo create \
+            -distribution=stable \
+            -component=main \
+            myrepo || true
+
+      - name: Add packages
+        run: |
+          aptly repo add myrepo debs
+
+      - name: Publish signed repo
+        run: |
+          aptly publish repo \
+            -distribution=stable \
+            -gpg-key="${{ secrets.APT_GPG_KEY_ID }}" \
+            myrepo
+
+      - name: Prepare site
+        run: |
+          mkdir public
+          cp -r ~/.aptly/public/* public/
+
+      - name: Deploy to Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
