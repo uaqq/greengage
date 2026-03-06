@@ -1,0 +1,22 @@
+Package: greengage
+Section: database
+Installed-Size: 45792
+Maintainer: Greengage <greengage@greengagedb.org>
+Architecture: amd64
+Version: 6.29.2
+Depends: libapr1 (>= 1.2.7), libbz2-1.0, libc6 (>= 2.35), libcurl4 (>= 7.16.2), libevent-2.1-7 (>= 2.1.8-stable), libgcc-s1 (>= 3.0), libgssapi-krb5-2 (>= 1.17), libldap-2.5-0 (>= 2.5.4), libpam0g (>= 0.99.7.1), libperl5.34 (>= 5.34.0), libpython2.7 (>= 2.7), libreadline8 (>= 6.0), libssl3 (>= 3.0.0~~alpha1), libstdc++6 (>= 11), libuuid1 (>= 2.16), libuv1 (>= 1.4.2), libxerces-c3.2, libxml2 (>= 2.7.4), libyaml-0-2, zlib1g (>= 1:1.1.4), iproute2, iputils-ping, less, openssh-client, openssh-server, openssl, python2, rsync, zip, net-tools, python2.7
+Conflicts: greengage-loaders, python-is-python3
+Filename: pool/main/g/greengage/greengage6.deb
+Size: 11496322
+MD5sum: 0ceb637a201fc8832b89e4cc76ac1c15
+SHA1: dd811d8feb9f0f10728b53fdf4609e7e2a891596
+SHA256: 97471d4d39333463b4d9413c3cc0e423cda2b227e37723b22d829064ee87dae1
+SHA512: 5db55c8b9b223b73a2c11d3886b03c0566f85cc2be29509a38416bad3ecafafdb38bbc47b834b9d9c39e228b5983d042cb535937c71d832f95b0ab1e31664137
+Description: Greengage MPP database engine
+ Greengage Database (GPDB) is an advanced, fully featured, open
+ source data warehouse, based on PostgreSQL. It provides powerful and
+ rapid analytics on petabyte scale data volumes. Uniquely geared toward
+ big data analytics, Greengage Database is powered by the world’s most
+ advanced cost-based query optimizer delivering high analytical query
+ performance on large data volumes.
+
