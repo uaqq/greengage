@@ -26,7 +26,7 @@ jobs:
       contents: read  # Explicit for default behavior
       packages: write # Required for GHCR access
       actions: write  # Required for artifact upload
-    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-build.yml@v33
+    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-build.yml@CI-5791
     with:
       version: 6
       target_os: ${{ matrix.target_os }}
@@ -110,7 +110,7 @@ jobs:
       contents: read  # Explicit for default behavior
       packages: read  # Explicit for GHCR access clarity
       actions: write  # Required for artifact upload
-    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-tests-orca.yml@v28
+    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-tests-orca.yml@CI-5791
     with:
       version: 6
       target_os: ${{ matrix.target_os }}
@@ -130,7 +130,7 @@ jobs:
       contents: read  # Explicit for default behavior
       packages: read  # Explicit for GHCR access clarity
       actions: write  # Required for artifact upload
-    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-tests-resgroup.yml@v31
+    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-tests-resgroup.yml@CI-5791
     with:
       version: 6
       target_os: ${{ matrix.target_os }}
@@ -152,7 +152,7 @@ jobs:
       contents: read  # Explicit for default behavior
       packages: write # Required for GHCR access
       actions: write  # Required for artifact upload
-    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-upload.yml@v28
+    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-upload.yml@CI-5791
     with:
       version: 6
       target_os: ${{ matrix.target_os }}
@@ -176,7 +176,7 @@ jobs:
       contents: read  # Explicit for default behavior
       packages: write # Required for GHCR access
       actions: write  # Required for artifact upload
-    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-package.yml@v38
+    uses: greengagedb/greengage-ci/.github/workflows/greengage-reusable-package.yml@CI-5791
     with:
       version: 6
       target_os: ${{ matrix.target_os }}
