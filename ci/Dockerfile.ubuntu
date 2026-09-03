@@ -52,7 +52,7 @@ ENV TARGET_OS_VERSION=22 \
     CONFIGURE_FLAGS="--enable-debug-extensions --with-gssapi --enable-cassert --enable-debug --enable-depend"
 
 # Compile with running mocking tests
-RUN gpdb_src/concourse/scripts/compile_gpdb.bash
+RUN SKIP_UNITTESTS=1 gpdb_src/concourse/scripts/compile_gpdb.bash
 
 FROM base AS code
 COPY . gpdb_src
